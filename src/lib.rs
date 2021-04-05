@@ -1,13 +1,15 @@
 //! # Hikaru
 //! 
 //! Hikaru provides Rust bindings to the Chess.com API, specifically for downloading all of a player's games. It is named after Grand Master Hikaru Nakamura (unless he objects, in which case I'll change the name). 
-//! JSON parsing is done via SerDE; reqwest is used to get data from the API.
+//! JSON parsing is done via SereE; reqwest is used to get data from the API.
 //! 
 //! ## How to Use
 //! 
 //! All you have to do is feed Hikaru a list of usernames, and you get back a Vec<[GameData]>
 //! 
 //! ```rust
+//! use hikaru::GameData;
+//! 
 //! let user_names = vec!["hikaru","GMHikaruOnTwitch"];
 //! let games = GameData::download(user_names);
 //! 
@@ -75,7 +77,6 @@ struct Game {
 
 #[derive(Debug, Serialize)]
 pub struct GameData {
-    // #[serde(rename="url")]
     game_url: String,
     time_control: String,
     start_time: Option<u32>,
@@ -150,7 +151,6 @@ impl From<(Game, &str)> for GameData {
             player_username: user.into(),
             date: pgn.UTC_date,
         }
-
     }
 }
 
