@@ -34,7 +34,7 @@ struct GameUrls {
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all="lowercase")]
-enum TimeClass {
+pub enum TimeClass {
     Bullet,
     Blitz,
     Rapid,
@@ -43,7 +43,7 @@ enum TimeClass {
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all="lowercase")]
-enum Rules {
+pub enum Rules {
     Chess,
     Chess960,
     CrazyHouse,
@@ -77,31 +77,31 @@ struct Game {
 
 #[derive(Debug, Serialize)]
 pub struct GameData {
-    game_url: String,
-    time_control: String,
-    start_time: Option<u32>,
-    end_time: u32,
-    rated: bool,
-    fen: String,
-    time_class: TimeClass,
-    rules: Rules,
-    eco_game: Option<String>,
-    tournament: Option<String>,
+    pub game_url: String,
+    pub time_control: String,
+    pub start_time: Option<u32>,
+    pub end_time: u32,
+    pub rated: bool,
+    pub fen: String,
+    pub time_class: TimeClass,
+    pub rules: Rules,
+    pub eco_game: Option<String>,
+    pub tournament: Option<String>,
     #[serde(rename="match")]
-    team_match: Option<String>,
-    white_rating: u32,
-    white_username: String,
-    black_rating: u32,
-    black_username: String,
-    eco_pgn: String,
-    eco_url: String,
-    result: GameResult,
-    result_win_lose: GameResultWinLose,
-    rating: u32,
-    date: String,
-    colour: String,
-    win: f32,
-    player_username: String,
+    pub team_match: Option<String>,
+    pub white_rating: u32,
+    pub white_username: String,
+    pub black_rating: u32,
+    pub black_username: String,
+    pub eco_pgn: String,
+    pub eco_url: String,
+    pub result: GameResult,
+    pub result_win_lose: GameResultWinLose,
+    pub rating: u32,
+    pub date: String,
+    pub colour: String,
+    pub win: f32,
+    pub player_username: String,
 }
 
 impl From<(Game, &str)> for GameData {
