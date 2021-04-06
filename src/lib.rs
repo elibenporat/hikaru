@@ -67,98 +67,6 @@ struct Game {
     black: Player,
 }
 
-#[derive(Debug, Serialize)]
-pub struct GameData {
-    pub game_url: String,
-    pub time_control: String,
-    pub start_time: Option<u32>,
-    pub end_time: u32,
-    pub rated: bool,
-    pub fen: String,
-    pub time_class: TimeClass,
-    pub rules: Rules,
-    pub eco_game: Option<String>,
-    pub tournament: Option<String>,
-    #[serde(rename = "match")]
-    pub team_match: Option<String>,
-    pub white_rating: u32,
-    pub white_username: String,
-    pub black_rating: u32,
-    pub black_username: String,
-    pub eco_pgn: String,
-    pub eco_url: String,
-    pub result: GameResult,
-    pub result_win_lose: GameResultWinLose,
-    pub rating: u32,
-    pub date: String,
-    pub colour: String,
-    pub win: f32,
-    pub player_username: String,
-}
-
-impl GameData {
-    pub fn download<'a>(user: &'a str) -> impl Iterator<Item = GameData> + 'a {
-        get_game_month_urls(user)
-            .into_iter()
-            .flat_map(|url| get_games(&url))
-            .map(move |game| (game, user).into())
-    }
-}
-
-impl From<(Game, &str)> for GameData {
-    fn from((game, user): (Game, &str)) -> Self {
-        let pgn: PGN = game.pgn.as_deref().map(PGN::from).unwrap_or_default();
-
-        let is_white = user == game.white.username;
-        let result = if is_white {
-            game.white.result
-        } else {
-            game.black.result
-        };
-        let result_win_lose = result.into();
-
-        let rating = if is_white {
-            game.white.rating
-        } else {
-            game.black.rating
-        };
-        let colour = if is_white { "White" } else { "Black" };
-
-        let win = match result_win_lose {
-            GameResultWinLose::Win => 1.0,
-            GameResultWinLose::Draw => 0.5,
-            GameResultWinLose::Loss => 0.0,
-        };
-
-        Self {
-            game_url: game.game_url,
-            time_control: game.time_control,
-            start_time: game.start_time,
-            end_time: game.end_time,
-            rated: game.rated,
-            fen: game.fen,
-            time_class: game.time_class,
-            rules: game.rules,
-            eco_game: game.eco,
-            tournament: game.tournament,
-            team_match: game.team_match,
-            result,
-            result_win_lose,
-            white_rating: game.white.rating,
-            white_username: game.white.username,
-            black_rating: game.black.rating,
-            black_username: game.black.username,
-            eco_pgn: pgn.ECO,
-            eco_url: pgn.ECO_url,
-            rating,
-            colour: colour.into(),
-            win,
-            player_username: user.into(),
-            date: pgn.UTC_date,
-        }
-    }
-}
-
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum GameResult {
@@ -280,6 +188,98 @@ fn get_game_month_urls(user: &str) -> Vec<String> {
     serde_json::from_str::<GameUrls>(&text)
         .expect("Serde error!")
         .archives
+}
+
+#[derive(Debug, Serialize)]
+pub struct GameData {
+    pub game_url: String,
+    pub time_control: String,
+    pub start_time: Option<u32>,
+    pub end_time: u32,
+    pub rated: bool,
+    pub fen: String,
+    pub time_class: TimeClass,
+    pub rules: Rules,
+    pub eco_game: Option<String>,
+    pub tournament: Option<String>,
+    #[serde(rename = "match")]
+    pub team_match: Option<String>,
+    pub white_rating: u32,
+    pub white_username: String,
+    pub black_rating: u32,
+    pub black_username: String,
+    pub eco_pgn: String,
+    pub eco_url: String,
+    pub result: GameResult,
+    pub result_win_lose: GameResultWinLose,
+    pub rating: u32,
+    pub date: String,
+    pub colour: String,
+    pub win: f32,
+    pub player_username: String,
+}
+
+impl GameData {
+    pub fn download<'a>(user: &'a str) -> impl Iterator<Item = GameData> + 'a {
+        get_game_month_urls(user)
+            .into_iter()
+            .flat_map(|url| get_games(&url))
+            .map(move |game| (game, user).into())
+    }
+}
+
+impl From<(Game, &str)> for GameData {
+    fn from((game, user): (Game, &str)) -> Self {
+        let pgn: PGN = game.pgn.as_deref().map(PGN::from).unwrap_or_default();
+
+        let is_white = user == game.white.username;
+        let result = if is_white {
+            game.white.result
+        } else {
+            game.black.result
+        };
+        let result_win_lose = result.into();
+
+        let rating = if is_white {
+            game.white.rating
+        } else {
+            game.black.rating
+        };
+        let colour = if is_white { "White" } else { "Black" };
+
+        let win = match result_win_lose {
+            GameResultWinLose::Win => 1.0,
+            GameResultWinLose::Draw => 0.5,
+            GameResultWinLose::Loss => 0.0,
+        };
+
+        Self {
+            game_url: game.game_url,
+            time_control: game.time_control,
+            start_time: game.start_time,
+            end_time: game.end_time,
+            rated: game.rated,
+            fen: game.fen,
+            time_class: game.time_class,
+            rules: game.rules,
+            eco_game: game.eco,
+            tournament: game.tournament,
+            team_match: game.team_match,
+            result,
+            result_win_lose,
+            white_rating: game.white.rating,
+            white_username: game.white.username,
+            black_rating: game.black.rating,
+            black_username: game.black.username,
+            eco_pgn: pgn.ECO,
+            eco_url: pgn.ECO_url,
+            rating,
+            colour: colour.into(),
+            win,
+            player_username: user.into(),
+            date: pgn.UTC_date,
+        }
+    }
 }
 
 fn get_games(url: &str) -> Vec<Game> {
