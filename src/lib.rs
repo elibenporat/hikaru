@@ -25,7 +25,7 @@ struct GameUrls {
     archives: Vec<String>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Copy, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum TimeClass {
     Bullet,
@@ -34,7 +34,7 @@ pub enum TimeClass {
     Daily,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Copy, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Rules {
     Chess,
@@ -180,7 +180,7 @@ pub enum GameResult {
     BugHousePartnerWin,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Copy, Clone, Serialize)]
 pub enum GameResultWinLose {
     Win,
     Loss,
@@ -213,7 +213,7 @@ struct Games {
 }
 
 #[allow(non_snake_case)]
-#[derive(Default, Debug)]
+#[derive(Default, Clone, Debug)]
 struct PGN {
     ECO: String,
     ECO_url: String,
