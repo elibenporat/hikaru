@@ -9,11 +9,8 @@
 //! ```rust
 //! use hikaru::GameData;
 //!
-//! let user_names = vec!["hikaru","GMHikaruOnTwitch"];
-//! let games = GameData::download(user_names);
-//!
 //! // Check out Hikaru's first game on Chess.com:
-//! dbg!(&games[0]);
+//! dbg!(Gamedata::download("hikaru").next())
 //! ```
 //!
 //! ## Future Plans
@@ -99,20 +96,27 @@ pub struct GameData {
     pub player_username: String,
 }
 
+impl GameData {
+    pub fn download<'a>(user: &'a str) -> impl Iterator<Item = GameData> + 'a {
+        get_game_month_urls(user)
+            .into_iter()
+            .flat_map(|url| get_games(&url))
+            .map(move |game| (game, user).into())
+    }
+}
+
 impl From<(Game, &str)> for GameData {
-    fn from(game_data: (Game, &str)) -> Self {
-        let game = game_data.0;
-        let user = game_data.1;
-        let pgn: PGN = game.pgn.into();
+    fn from((game, user): (Game, &str)) -> Self {
+        let pgn: PGN = game.pgn.as_deref().map(PGN::from).unwrap_or_default();
 
         let is_white = user == game.white.username;
-
         let result = if is_white {
             game.white.result
         } else {
             game.black.result
         };
         let result_win_lose = result.into();
+
         let rating = if is_white {
             game.white.rating
         } else {
@@ -126,7 +130,7 @@ impl From<(Game, &str)> for GameData {
             GameResultWinLose::Loss => 0.0,
         };
 
-        GameData {
+        Self {
             game_url: game.game_url,
             time_control: game.time_control,
             start_time: game.start_time,
@@ -219,53 +223,48 @@ struct PGN {
     start_time: String,
 }
 
-impl From<Option<String>> for PGN {
-    fn from(pgn: Option<String>) -> Self {
+impl From<&str> for PGN {
+    fn from(pgn: &str) -> Self {
         let mut eco = String::new();
         let mut eco_url = String::new();
         let mut utc_date = String::new();
-
-        if let Some(pgn_data) = pgn {
-            for line in pgn_data.split('\n') {
-                if line.starts_with("[ECO \"") {
-                    eco = line
-                        .split(" ")
-                        .nth(1)
-                        .unwrap_or("")
-                        .replace('"', "")
-                        .replace(']', "")
-                        .into();
-                }
-                if line.starts_with("[ECOUrl \"") {
-                    eco_url = line
-                        .split(" ")
-                        .nth(1)
-                        .unwrap_or("")
-                        .replace('"', "")
-                        .replace(']', "")
-                        .into();
-                }
-                if line.starts_with("[UTCDate \"") {
-                    utc_date = line
-                        .split(" ")
-                        .nth(1)
-                        .unwrap_or("")
-                        .replace('"', "")
-                        .replace(']', "")
-                        .into();
-                }
+        for line in pgn.split('\n') {
+            if line.starts_with("[ECO \"") {
+                eco = line
+                    .split(" ")
+                    .nth(1)
+                    .unwrap_or("")
+                    .replace('"', "")
+                    .replace(']', "")
+                    .into();
             }
-
-            Self {
-                ECO: eco,
-                ECO_url: eco_url,
-                UTC_date: utc_date,
-                UTC_time: "".to_string(),
-                start_time: "".to_string(),
-                start_date: "".to_string(),
+            if line.starts_with("[ECOUrl \"") {
+                eco_url = line
+                    .split(" ")
+                    .nth(1)
+                    .unwrap_or("")
+                    .replace('"', "")
+                    .replace(']', "")
+                    .into();
             }
-        } else {
-            Default::default()
+            if line.starts_with("[UTCDate \"") {
+                utc_date = line
+                    .split(" ")
+                    .nth(1)
+                    .unwrap_or("")
+                    .replace('"', "")
+                    .replace(']', "")
+                    .into();
+            }
+        }
+
+        Self {
+            ECO: eco,
+            ECO_url: eco_url,
+            UTC_date: utc_date,
+            UTC_time: String::new(),
+            start_time: String::new(),
+            start_date: String::new(),
         }
     }
 }
@@ -278,39 +277,18 @@ fn get_game_month_urls(user: &str) -> Vec<String> {
         .text()
         .expect("Invalid response");
 
-    let game_urls: GameUrls = serde_json::from_str(&text).expect("Serde error!");
-
-    game_urls.archives
+    serde_json::from_str::<GameUrls>(&text)
+        .expect("Serde error!")
+        .archives
 }
 
-fn get_games(game_archive_urls: Vec<String>) -> Vec<Game> {
-    let mut games: Vec<Game> = vec![];
-
-    for game_month in game_archive_urls {
-        let games_text = get(&game_month)
-            .expect("Didn't get a response")
-            .text()
-            .expect("Invalid response");
-
-        let month_games: Games = serde_json::from_str(&games_text).expect("Serde error!");
-        games.extend(month_games.games)
-    }
-
-    games
-}
-
-impl GameData {
-    pub fn download(users: Vec<&str>) -> Vec<GameData> {
-        let mut game_data = vec![];
-        for user in users {
-            let urls = get_game_month_urls(&user);
-            let games = get_games(urls);
-            let game_data_user: Vec<GameData> =
-                games.into_iter().map(|game| (game, user).into()).collect();
-
-            game_data.extend(game_data_user);
-        }
-        game_data
-    }
+fn get_games(url: &str) -> Vec<Game> {
+    let games_text = get(url)
+        .expect("Didn't get a response")
+        .text()
+        .expect("Invalid response");
+    serde_json::from_str::<Games>(&games_text)
+        .expect("Serde error!")
+        .games
 }
 
