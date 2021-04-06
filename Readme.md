@@ -1,5 +1,5 @@
 # Hikaru
-Hikaru (the library), is a simple wrapper around the chess.com API that makes it easy to download game data.
+_Hikaru_ (the crate) is a simple wrapper around the [Chess.com API](https://www.chess.com/news/view/published-data-api) that makes it easy to fetch the game data of a single player.
 
 ## Usage
 ```rust
