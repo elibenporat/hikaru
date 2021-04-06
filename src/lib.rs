@@ -18,14 +18,14 @@
 //! so this can be fed into the engine for a variety of analyses.
 
 use reqwest::blocking::get;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 struct GameUrls {
     archives: Vec<String>,
 }
 
-#[derive(Debug, Copy, Clone, Deserialize)]
+#[derive(Debug, Copy, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum TimeClass {
     Bullet,
@@ -34,7 +34,7 @@ pub enum TimeClass {
     Daily,
 }
 
-#[derive(Debug, Copy, Clone, Deserialize)]
+#[derive(Debug, Copy, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Rules {
     Chess,
@@ -47,7 +47,7 @@ pub enum Rules {
     OddsChess,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 struct Game {
     #[serde(rename = "url")]
     game_url: String,
@@ -67,7 +67,7 @@ struct Game {
     black: Player,
 }
 
-#[derive(Debug, Copy, Clone, Deserialize)]
+#[derive(Debug, Copy, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum GameResult {
     Win,
@@ -88,7 +88,7 @@ pub enum GameResult {
     BugHousePartnerWin,
 }
 
-#[derive(Debug, Copy, Clone, Deserialize)]
+#[derive(Debug, Copy, Clone, Deserialize, Serialize)]
 pub enum GameResultWinLose {
     Win,
     Loss,
@@ -106,7 +106,7 @@ impl From<GameResult> for GameResultWinLose {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 struct Player {
     username: String,
     rating: u32,
@@ -115,13 +115,13 @@ struct Player {
     id: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 struct Games {
     games: Vec<Game>,
 }
 
 #[allow(non_snake_case)]
-#[derive(Default, Clone, Debug)]
+#[derive(Default, Clone, Debug, Serialize)]
 struct PGN {
     ECO: String,
     ECO_url: String,
@@ -177,7 +177,7 @@ impl From<&str> for PGN {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct GameData {
     pub game_url: String,
     pub time_control: String,
