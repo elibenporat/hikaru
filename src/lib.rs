@@ -18,14 +18,14 @@
 //! so this can be fed into the engine for a variety of analyses.
 
 use reqwest::blocking::get;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 
 #[derive(Deserialize)]
 struct GameUrls {
     archives: Vec<String>,
 }
 
-#[derive(Debug, Copy, Clone, Deserialize, Serialize)]
+#[derive(Debug, Copy, Clone, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum TimeClass {
     Bullet,
@@ -34,7 +34,7 @@ pub enum TimeClass {
     Daily,
 }
 
-#[derive(Debug, Copy, Clone, Deserialize, Serialize)]
+#[derive(Debug, Copy, Clone, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Rules {
     Chess,
@@ -67,7 +67,7 @@ struct Game {
     black: Player,
 }
 
-#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
+#[derive(Debug, Copy, Clone, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum GameResult {
     Win,
@@ -88,7 +88,7 @@ pub enum GameResult {
     BugHousePartnerWin,
 }
 
-#[derive(Debug, Copy, Clone, Serialize)]
+#[derive(Debug, Copy, Clone, Deserialize)]
 pub enum GameResultWinLose {
     Win,
     Loss,
@@ -106,7 +106,7 @@ impl From<GameResult> for GameResultWinLose {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize)]
 struct Player {
     username: String,
     rating: u32,
@@ -177,7 +177,7 @@ impl From<&str> for PGN {
     }
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Deserialize)]
 pub struct GameData {
     pub game_url: String,
     pub time_control: String,
