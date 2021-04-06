@@ -177,19 +177,6 @@ impl From<&str> for PGN {
     }
 }
 
-fn get_game_month_urls(user: &str) -> Vec<String> {
-    let url = format!("https://api.chess.com/pub/player/{}/games/archives", user);
-
-    let text = get(&url)
-        .expect("Didn't get a response")
-        .text()
-        .expect("Invalid response");
-
-    serde_json::from_str::<GameUrls>(&text)
-        .expect("Serde error!")
-        .archives
-}
-
 #[derive(Debug, Serialize)]
 pub struct GameData {
     pub game_url: String,
@@ -282,6 +269,19 @@ impl From<(Game, &str)> for GameData {
     }
 }
 
+fn get_game_month_urls(user: &str) -> Vec<String> {
+    let url = format!("https://api.chess.com/pub/player/{}/games/archives", user);
+
+    let text = get(&url)
+        .expect("Didn't get a response")
+        .text()
+        .expect("Invalid response");
+
+    serde_json::from_str::<GameUrls>(&text)
+        .expect("Serde error!")
+        .archives
+}
+
 fn get_games(url: &str) -> Vec<Game> {
     let games_text = get(url)
         .expect("Didn't get a response")
@@ -291,4 +291,3 @@ fn get_games(url: &str) -> Vec<Game> {
         .expect("Serde error!")
         .games
 }
-
