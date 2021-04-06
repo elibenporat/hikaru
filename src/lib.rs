@@ -209,7 +209,7 @@ struct Games {
 }
 
 #[allow(non_snake_case)]
-#[derive(Debug)]
+#[derive(Default, Debug)]
 struct PGN {
     ECO: String,
     ECO_url: String,
@@ -255,6 +255,7 @@ impl From<Option<String>> for PGN {
                         .into();
                 }
             }
+
             Self {
                 ECO: eco,
                 ECO_url: eco_url,
@@ -264,14 +265,7 @@ impl From<Option<String>> for PGN {
                 start_date: "".to_string(),
             }
         } else {
-            Self {
-                ECO: "".to_string(),
-                ECO_url: "".to_string(),
-                UTC_date: "".to_string(),
-                UTC_time: "".to_string(),
-                start_time: "".to_string(),
-                start_date: "".to_string(),
-            }
+            Default::default()
         }
     }
 }
